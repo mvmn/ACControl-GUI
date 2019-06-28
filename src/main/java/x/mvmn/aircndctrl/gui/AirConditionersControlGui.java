@@ -3,11 +3,9 @@ package x.mvmn.aircndctrl.gui;
 import java.awt.AWTException;
 import java.awt.CheckboxMenuItem;
 import java.awt.Menu;
-import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
-import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -15,7 +13,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.concurrent.Callable;
 
 import javax.imageio.ImageIO;
@@ -43,7 +40,69 @@ public class AirConditionersControlGui {
 		if (!SystemTray.isSupported()) {
 			System.err.println("Warning: SystemTray is not supported. Program might not work.");
 		}
-		new AirConditionersControlGui();
+		new AirConditionersControlGui().doDiscovery();
+	}
+
+	private static final Map<String, Object> CELSIUS_TEMPS;
+	static {
+		LinkedHashMap<String, Object> celsiusTemps = new LinkedHashMap<>();
+		for (int i = 16; i <= 30; i++) {
+			celsiusTemps.put(String.valueOf(i), i);
+		}
+		CELSIUS_TEMPS = Collections.unmodifiableMap(celsiusTemps);
+	}
+	private static final Map<String, Object> FAN_SPEEDS;
+	static {
+		LinkedHashMap<String, Object> fanModes = new LinkedHashMap<>();
+		fanModes.put("Auto", 0);
+		fanModes.put("Slowest", 1);
+		fanModes.put("Slow", 2);
+		fanModes.put("Medium", 3);
+		fanModes.put("Higher", 4);
+		fanModes.put("Highest", 5);
+		FAN_SPEEDS = Collections.unmodifiableMap(fanModes);
+	}
+
+	private static final Map<String, Object> AC_MODES;
+	static {
+		LinkedHashMap<String, Object> acModes = new LinkedHashMap<>();
+		acModes.put("Auto", 0);
+		acModes.put("Cool", 1);
+		acModes.put("Dry", 2);
+		acModes.put("Fan", 3);
+		acModes.put("Heat", 4);
+		AC_MODES = Collections.unmodifiableMap(acModes);
+	}
+
+	private static final Map<String, Object> DIRECTIONS_HORIZONTAL;
+	static {
+		LinkedHashMap<String, Object> directions = new LinkedHashMap<>();
+		directions.put("Current", 0);
+		directions.put("Swing", 1);
+		directions.put("Leftmost", 2);
+		directions.put("Left", 3);
+		directions.put("Center", 4);
+		directions.put("Right", 5);
+		directions.put("Rightmost", 6);
+		DIRECTIONS_HORIZONTAL = Collections.unmodifiableMap(directions);
+	}
+
+	private static final Map<String, Object> DIRECTIONS_VERTICAL;
+	static {
+		LinkedHashMap<String, Object> directions = new LinkedHashMap<>();
+		directions.put("Current", 0);
+		directions.put("Swing: full", 1);
+		directions.put("Upmost", 2);
+		directions.put("Up", 3);
+		directions.put("Middle", 4);
+		directions.put("Down", 5);
+		directions.put("Downmost", 6);
+		directions.put("Swing: upmost", 11);
+		directions.put("Swing: up", 10);
+		directions.put("Swing: middle", 9);
+		directions.put("Swing: down", 8);
+		directions.put("Swing: downmost", 7);
+		DIRECTIONS_VERTICAL = Collections.unmodifiableMap(directions);
 	}
 
 	protected final PopupMenu popup;
@@ -122,17 +181,23 @@ public class AirConditionersControlGui {
 		Runnable syncStatusOffThread = () -> new Thread(syncStatusSafe).start();
 		result.add(boolParamAcMenuOption("Power", "Pow", status, syncStatusOffThread));
 		result.add(boolParamAcMenuOption("Indicator light", "Lig", status, syncStatusOffThread));
-		LinkedHashMap<String, Object> celsiusTemps = new LinkedHashMap<>();
-		for (int i = 16; i <= 30; i++) {
-			celsiusTemps.put(String.valueOf(i), i);
-		}
-		result.add(optionsSubmenu("Temperature C", celsiusTemps, "SetTem", status, syncStatusOffThread));
+		result.add(optionsSubmenu("Temperature C", CELSIUS_TEMPS, "SetTem", status, syncStatusOffThread));
+		result.add(optionsSubmenu("AC mode", AC_MODES, "Mod", status, syncStatusOffThread));
+		result.add(boolParamAcMenuOption("Sleep mode", "SwhSlp", status, syncStatusOffThread));
+		result.addSeparator();
+		result.add(optionsSubmenu("Fan speed", FAN_SPEEDS, "WdSpd", status, syncStatusOffThread));
+		result.add(boolParamAcMenuOption("Fan turbo", "Tur", status, syncStatusOffThread));
+		result.add(boolParamAcMenuOption("X-Fan", "Blo", status, syncStatusOffThread));
+		result.add(boolParamAcMenuOption("Quiet mode", "Quiet", status, syncStatusOffThread));
+		result.addSeparator();
+		result.add(optionsSubmenu("Air flow directions: vertical", DIRECTIONS_VERTICAL, "SwUpDn", status, syncStatusOffThread));
+		result.add(optionsSubmenu("Air flow directions: horizontal ", DIRECTIONS_HORIZONTAL, "SwingLfRig", status, syncStatusOffThread));
 		result.addSeparator();
 		result.add(boolParamAcMenuOption("Fresh air", "Air", status, syncStatusOffThread));
 		result.add(boolParamAcMenuOption("Ionization (Cold Plasma)", "Health", status, syncStatusOffThread));
 		result.addSeparator();
-		result.add(boolParamAcMenuOption("X-Fan", "Blo", status, syncStatusOffThread));
-		result.add(boolParamAcMenuOption("Turbo", "Tur", status, syncStatusOffThread));
+		result.add(boolParamAcMenuOption("Freeze prevention heating", "StHt", status, syncStatusOffThread));
+		result.add(boolParamAcMenuOption("Energy saving", "SvSt", status, syncStatusOffThread));
 
 		return result;
 	}
@@ -144,8 +209,7 @@ public class AirConditionersControlGui {
 		});
 	}
 
-	protected static Menu optionsSubmenu(String name, LinkedHashMap<String, Object> options, String param, Map<String, Object> status,
-			Runnable syncStatusOffThread) {
+	protected static Menu optionsSubmenu(String name, Map<String, Object> options, String param, Map<String, Object> status, Runnable syncStatusOffThread) {
 		Menu menu = new Menu(name);
 
 		Object currentVal = status.get(param);
