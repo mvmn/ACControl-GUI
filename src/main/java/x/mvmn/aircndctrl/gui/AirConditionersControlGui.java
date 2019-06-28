@@ -204,7 +204,7 @@ public class AirConditionersControlGui {
 
 	protected static CheckboxMenuItem boolParamAcMenuOption(String name, String param, Map<String, Object> status, Runnable syncStatusOffThread) {
 		return SwingUtil.checkboxMenuItem(name, LangUtils.INT_ONE.equals(status.get(param)), event -> {
-			status.put(param, 1);
+			status.put(param, ((CheckboxMenuItem) event.getSource()).getState() ? 1 : 0);
 			syncStatusOffThread.run();
 		});
 	}
