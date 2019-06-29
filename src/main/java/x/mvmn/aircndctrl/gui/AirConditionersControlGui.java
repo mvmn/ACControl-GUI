@@ -219,9 +219,7 @@ public class AirConditionersControlGui {
 			menuItem.addItemListener(event -> {
 				for (int i = 0; i < menu.getItemCount(); i++) {
 					CheckboxMenuItem cbmi = (CheckboxMenuItem) menu.getItem(i);
-					if (cbmi != menuItem) {
-						cbmi.setState(false);
-					}
+					cbmi.setState(cbmi == menuItem);
 				}
 				status.put(param, option.getValue());
 				syncStatusOffThread.run();
