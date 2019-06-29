@@ -118,6 +118,7 @@ public class AirConditionersControlGui {
 		TrayIcon trayIcon;
 		try {
 			trayIcon = new TrayIcon(ImageIO.read(AirConditionersControlGui.class.getResourceAsStream("logo.png")));
+			trayIcon.setImageAutoSize(true);
 		} catch (IOException e1) {
 			throw new RuntimeException(e1);
 		}
