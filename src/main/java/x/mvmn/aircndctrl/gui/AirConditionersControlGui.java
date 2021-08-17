@@ -204,14 +204,16 @@ public class AirConditionersControlGui {
 		return result;
 	}
 
-	protected static CheckboxMenuItem boolParamAcMenuOption(String name, String param, Map<String, Object> status, Runnable syncStatusOffThread) {
+	protected static CheckboxMenuItem boolParamAcMenuOption(String name, String param, Map<String, Object> status,
+			Runnable syncStatusOffThread) {
 		return SwingUtil.checkboxMenuItem(name, LangUtils.INT_ONE.equals(status.get(param)), event -> {
 			status.put(param, ((CheckboxMenuItem) event.getSource()).getState() ? 1 : 0);
 			syncStatusOffThread.run();
 		});
 	}
 
-	protected static Menu optionsSubmenu(String name, Map<String, Object> options, String param, Map<String, Object> status, Runnable syncStatusOffThread) {
+	protected static Menu optionsSubmenu(String name, Map<String, Object> options, String param, Map<String, Object> status,
+			Runnable syncStatusOffThread) {
 		Menu menu = new Menu(name);
 
 		Object currentVal = status.get(param);
