@@ -33,6 +33,7 @@ import x.mvmn.aircndctrl.service.impl.EncryptionServiceImpl;
 public class AirConditionersControlGui {
 
 	public static void main(String[] args) {
+		System.setProperty("apple.awt.UIElement", "true");
 		File dataFolder = new File(new File(System.getProperty("user.home")), ".acctrl");
 		if (!dataFolder.exists()) {
 			dataFolder.mkdir();
