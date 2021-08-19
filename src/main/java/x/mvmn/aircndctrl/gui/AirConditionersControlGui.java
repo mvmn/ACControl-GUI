@@ -5,6 +5,7 @@ import java.awt.CheckboxMenuItem;
 import java.awt.Menu;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
+import java.awt.Toolkit;
 import java.awt.TrayIcon;
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +35,7 @@ public class AirConditionersControlGui {
 
 	public static void main(String[] args) {
 		System.setProperty("apple.awt.UIElement", "true");
+		Toolkit.getDefaultToolkit();
 		File dataFolder = new File(new File(System.getProperty("user.home")), ".acctrl");
 		if (!dataFolder.exists()) {
 			dataFolder.mkdir();
